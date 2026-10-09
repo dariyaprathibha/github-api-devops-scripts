@@ -1,0 +1,37 @@
+#!/bin/bash
+# Script to list users with READ-ONLY access to a GitHub repo
+
+API_URL="https://api.github.com"
+USERNAME=$GITHUB_USERNAME
+TOKEN=$GITHUB_TOKEN
+REPO_OWNER=$1
+REPO_NAME=$2
+
+# Check arguments
+if [[ -z "$REPO_OWNER" || -z "$REPO_NAME" ]]; then
+  echo "Usage: $0 <owner> <repo_name>"
+  exit 1
+fi
+
+# Function to call GitHub API
+function github_api_get {
+    local endpoint="$1"
+    curl -s -u "${USERNAME}:${TOKEN}" "${API_URL}/${endpoint}"
+}
+
+# List read-only users
+function list_users_with_read_access {
+    local endpoint="repos/${REPO_OWNER}/${REPO_NAME}/collaborators"
+    local response=$(github_api_get "$endpoint")
+
+    collaborators=$(echo "$response" | jq -r '.[] | select(.permissions.pull == true and .permissions.push == false and .permissions.admin == false) | .login')
+
+    if [[ -z "$collaborators" ]]; then
+        echo "No READ-ONLY users found for ${REPO_OWNER}/${REPO_NAME}."
+    else
+        echo "READ-ONLY users for ${REPO_OWNER}/${REPO_NAME}:"
+        echo "$collaborators"
+    fi
+}
+
+list_users_with_read_access
