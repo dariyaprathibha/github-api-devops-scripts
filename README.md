@@ -11,6 +11,7 @@ Useful for DevOps Audit & Access Management.
 
 ### Step 1: Set Token
 export GITHUB_TOKEN="your_token_here"
+
 export GITHUB_USERNAME="dariyaprathibha"
 
 ### Step 2: Run Script
